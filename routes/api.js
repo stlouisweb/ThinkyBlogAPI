@@ -1,3 +1,9 @@
+/*
+* api.js
+*
+* Sets up models, relations, and CRUD method server routes.
+*/
+
 // Import
 var config = require(__dirname+'/../config.js');
 var thinky = require('thinky')(config);
