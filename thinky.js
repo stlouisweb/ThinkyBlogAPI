@@ -1,3 +1,6 @@
+/*
+* Thinky config and initialization
+*/
 var thinky = require('thinky');
 var config = require('./config');
 
