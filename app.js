@@ -41,6 +41,9 @@ app.route('/api/comment/:id').delete(api.deleteComment);
 // A 404 page is probably a better move
 //app.route('*').get(routes.index);
 
+// route to authenticate a user (POST http://localhost:3000/api/authenticate)
+app.route('/api/authenticate').post(api.authenticate);
+
 // Start server
 app.listen(config.expressPort, function(){
     console.log("Express server listening on port %d in %s mode",
