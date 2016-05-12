@@ -3,6 +3,7 @@ var express = require('express');
 var api = require('./routes/api');
 var config = require('./config.js');
 var posts = require('./routes/posts.js');
+var authors = require('./routes/authors.js');
 var bodyParser = require('body-parser');
 
 var app = express();
@@ -28,11 +29,11 @@ app.route('/api/post/:id').delete(posts.deletePost);
 app.route('/api/post/:id').put(posts.editPost);
 
 // Author API
-app.route('/api/authors').get(api.authors);
-app.route('/api/author/:id').get(api.author);
-app.route('/api/author').post(api.addAuthor);
-app.route('/api/author/:id').delete(api.deleteAuthor);
-app.route('/api/author/:id').put(api.editAuthor);
+app.route('/api/authors').get(authors.authors);
+app.route('/api/author/:id').get(authors.author);
+app.route('/api/author').post(authors.addAuthor);
+app.route('/api/author/:id').delete(authors.deleteAuthor);
+app.route('/api/author/:id').put(authors.editAuthor);
 
 // Comment API
 app.route('/api/comment').post(api.addComment);

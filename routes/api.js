@@ -10,15 +10,9 @@ var thinky = require('thinky')(config);
 var r = thinky.r;
 var type = thinky.type;
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
-var posts = require(__dirname+'/posts.js');
+var posts = require('./posts.js');
+var authors = require('./authors.js');
 
-
-var Author = thinky.createModel('Author', {
-    id: type.string(),
-    name: type.string(),
-    email: type.string(),
-    website: type.string()
-});
 var Comment = thinky.createModel('Comment', {
     id: type.string(),
     name: type.string(),
@@ -31,8 +25,8 @@ var Comment = thinky.createModel('Comment', {
 // Specify the relations
 
 // A post has one author that we will keep in the field `author`.
-posts.Post.belongsTo(Author, "author", "authorId", "id");
-Author.hasMany(posts.Post, "posts", "id", "authorId");
+posts.Post.belongsTo(authors.Author, "author", "authorId", "id");
+authors.Author.hasMany(posts.Post, "posts", "id", "authorId");
 
 // A post has multiple comments that we will keep in the field `comments`.
 posts.Post.hasMany(Comment, "comments", "id", "postId");
@@ -41,71 +35,7 @@ Comment.belongsTo(posts.Post, "post", "postId", "id");
 
 // Make sure that an index on date is available
 posts.Post.ensureIndex("date");
-Author.ensureIndex("name");
-
-
-
-
-
-// Retrieve all authors
-exports.authors = function (req, res) {
-    Author.orderBy({index: 'name'}).run().then(function(authors) {
-        res.json({
-            authors: authors
-        });
-    }).error(handleError(res));
-};
-
-
-// Retrieve one author
-exports.author = function (req, res) {
-    var id = req.params.id;
-
-    Author.get(id).run().then(function(author) {
-        res.json({
-            author: author
-        });
-    }).error(handleError(res));
-};
-
-
-// Save an author in the database
-exports.addAuthor = function (req, res) {
-    var author = new Author(req.body);
-
-    author.save().then(function(result) {
-        res.json({
-            result: result
-        });
-    }).error(handleError(res));
-};
-
-
-// Delete an author
-exports.deleteAuthor = function (req, res) {
-    var id = req.params.id;
-
-    // Delete an author and update all the post referencing the author
-    Author.get(id).getJoin({posts: true}).run().then(function(author) {
-        author.delete().then(function(author) {
-            res.json({
-                result: author
-            })
-        }).error(handleError(res));
-    }).error(handleError(res));
-};
-
-
-// Edit an author
-exports.editAuthor = function (req, res) {
-    // Update an author
-    Author.get(req.body.id).update(req.body).run().then(function(author) {
-        res.json({
-            author: author
-        })
-    }).error(handleError(res));
-};
-
+authors.Author.ensureIndex("name");
 
 // Add a comment
 exports.addComment = function (req, res) {
