@@ -2,6 +2,7 @@
 var express = require('express');
 var api = require('./routes/api');
 var config = require('./config.js');
+var posts = require('./routes/posts.js');
 var bodyParser = require('body-parser');
 
 var app = express();
@@ -19,12 +20,12 @@ app.route('/').get(function (req, res) {
 });
 
 // Post API
-app.route('/api/posts').get(api.posts);
-app.route('/api/post/:id').get(api.post);
-app.route('/api/post_and_authors/:id').get(api.postAndAuthors);
-app.route('/api/post').post(api.addPost);
-app.route('/api/post/:id').delete(api.deletePost);
-app.route('/api/post/:id').put(api.editPost);
+app.route('/api/posts').get(posts.posts);
+app.route('/api/post/:id').get(posts.post);
+app.route('/api/post_and_authors/:id').get(posts.postAndAuthors);
+app.route('/api/post').post(posts.addPost);
+app.route('/api/post/:id').delete(posts.deletePost);
+app.route('/api/post/:id').put(posts.editPost);
 
 // Author API
 app.route('/api/authors').get(api.authors);

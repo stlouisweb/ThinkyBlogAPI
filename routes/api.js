@@ -1,7 +1,7 @@
 /*
 * api.js
 *
-* Sets up models, relations, and CRUD method server routes.
+* Sets up relations and default routes.
 */
 
 // Import
@@ -10,16 +10,9 @@ var thinky = require('thinky')(config);
 var r = thinky.r;
 var type = thinky.type;
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
+var posts = require(__dirname+'/posts.js');
 
-// Create the models
-// Note: if we don't provide the field date, the default function will be called
-var Post = thinky.createModel('Post', {
-    id: type.string(),
-    title: type.string(),
-    text: type.string(),
-    authorId: type.string(),
-    date: type.date().default(r.now)
-});
+
 var Author = thinky.createModel('Author', {
     id: type.string(),
     name: type.string(),
@@ -38,94 +31,20 @@ var Comment = thinky.createModel('Comment', {
 // Specify the relations
 
 // A post has one author that we will keep in the field `author`.
-Post.belongsTo(Author, "author", "authorId", "id");
-Author.hasMany(Post, "posts", "id", "authorId");
+posts.Post.belongsTo(Author, "author", "authorId", "id");
+Author.hasMany(posts.Post, "posts", "id", "authorId");
 
 // A post has multiple comments that we will keep in the field `comments`.
-Post.hasMany(Comment, "comments", "id", "postId");
-Comment.belongsTo(Post, "post", "postId", "id");
+posts.Post.hasMany(Comment, "comments", "id", "postId");
+Comment.belongsTo(posts.Post, "post", "postId", "id");
 
 
 // Make sure that an index on date is available
-Post.ensureIndex("date");
+posts.Post.ensureIndex("date");
 Author.ensureIndex("name");
 
 
-// Retrieve a list of posts ordered by date with its author and comments
-exports.posts = function (req, res) {
-    Post.orderBy({index: r.desc('date')}).getJoin({author: true, comments: {_order: "date"}}).run().then(function(posts) {
-        res.json({
-            posts: posts
-        });
-    }).error(handleError(res));
-};
 
-
-// Retrieve one post with its author and comments
-exports.post = function (req, res) {
-    var id = req.params.id;
-    Post.get(id).getJoin({author: true, comments: {_order: "date"}}).run().then(function(post) {
-        res.json({
-            post: post
-        });
-    }).error(handleError(res));
-};
-
-
-// Retrieve a post and all the available authors
-exports.postAndAuthors = function (req, res) {
-    var id = req.params.id;
-    Post.get(id).run().then(function(post) {
-        Author.run().then(function(authors) {
-            res.json({
-                post: post,
-                authors: authors
-            });
-        }).error(handleError(res));
-    }).error(handleError(res));
-};
-
-
-// Save a post in the database
-exports.addPost = function (req, res) {
-    var newPost = new Post(req.body);
-
-    newPost.save().then(function(result) {
-        res.json({
-            result: result
-        });
-    }).error(handleError(res));
-};
-
-
-// Delete a post and its comments from the database
-exports.deletePost = function (req, res) {
-    var id = req.params.id;
-
-    // Delete a post and all its comments
-    Post.get(id).getJoin({comments: true}).run().then(function(post) {
-        post.deleteAll({comments: true}).then(function(result) {
-            res.json({
-                result: result
-            });
-        }).error(handleError(res));
-    }).error(handleError(res));
-};
-
-
-// Update a post in the database
-exports.editPost = function (req, res) {
-    Post.get(req.body.id).run().then(function(post) {
-        post.title = req.body.title;
-        post.text = req.body.text;
-        post.authorId = req.body.authorId;
-        post.save().then(function(post) {
-            res.json({
-                post: post
-            });
-        }).error(handleError(res));
-    }).error(handleError(res));
-};
 
 
 // Retrieve all authors
@@ -230,7 +149,7 @@ exports.authenticate = function (req, res) {
     token: token
   });
 
-  // // find the user
+  // find the user
   // User.findOne({
   //   name: req.body.name
   // }, function(err, user) {
@@ -271,3 +190,4 @@ function handleError(res) {
         return res.send(500, {error: error.message});
     }
 }
+exports.handleError = handleError;
